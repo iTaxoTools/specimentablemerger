@@ -25,7 +25,7 @@ class TableFormat(FileFormat):
         self.sep = sep
 
     def load_table(self, filepath_or_buffer: Union[str, TextIO]) -> pd.DataFrame:
-        pd.read_csv(filepath_or_buffer, sep=self.sep).rename(
+        return pd.read_csv(filepath_or_buffer, sep=self.sep).rename(
             columns=str.casefold)
 
     def write_table(self, path_or_buf: Union[str, TextIO], table: pd.DataFrame) -> None:
@@ -51,7 +51,9 @@ def merge_rows(rows: pd.DataFrame, column_name: str) -> pd.DataFrame:
         result = rows.copy()
         result['remarks'] = f"Rows for this {column_name} not merged due to multiple occurrences with non-identical content in one table"
     else:
-        result.to_frame().T
+        result = result.to_frame()
+        if result.shape[1] == 1:
+            result = result.T
     return result
 
 
@@ -65,9 +67,18 @@ class ProgramState():
         self.output_format: FileFormat = TableFormat("\t")
         self.unifying_field = "specimenid"
 
+    def set_input_format(self, format: FileFormat) -> None:
+        self.input_format = format
+
+    def set_output_format(self, format: FileFormat) -> None:
+        self.output_format = format
+
+    def set_unifying_field(self, field: str) -> None:
+        self.unifying_field = field
+
     def merger(self, input_files: List[str], output_file: str) -> None:
-        table = pd.concat(self.input_format.load_table(filename)
-                          for filename in input_files)
+        table = pd.concat([self.input_format.load_table(filename)
+                           for filename in input_files])
         output_table = table.groupby(self.unifying_field).apply(
             merge_rows, self.unifying_field)
         self.output_format.write_table(output_file, output_table)

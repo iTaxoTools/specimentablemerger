@@ -150,7 +150,7 @@ class FileListChooser():
             self.frame, text="Remove Files", command=self.remove_files)
 
         self.label.grid(row=0, column=0)
-        self.listbox.grid(row=1, column=0, rowspan=4)
+        self.listbox.grid(row=1, column=0, rowspan=4, sticky="nsew")
         self.yscroll.grid(row=1, column=1, rowspan=4, sticky="ns")
         self.add_files_btn.grid(row=1, column=2, sticky="w")
         self.add_directory_btn.grid(row=2, column=2, sticky="w")
@@ -184,5 +184,5 @@ def display_errors_and_warnings() -> Any:
                 tk.messagebox.showwarning("Warning", str(w.message))
     except FileNotFoundError as ex:
         tk.messagebox.showerror("Error", ex.strerror)
-    except Exception as ex:
-        tk.messagebox.showerror("Error", str(ex))
+    # except Exception as ex:
+    #     tk.messagebox.showerror("Error", str(ex))
