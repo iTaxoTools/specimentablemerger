@@ -2,7 +2,10 @@ import os.path
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.ttk as ttk
+import tkinter.messagebox
 from typing import Literal, Any, Dict, Tuple, List, Optional
+from contextlib import contextmanager
+import warnings
 
 
 def try_relpath(path: str) -> str:
@@ -170,3 +173,16 @@ class FileListChooser():
 
     def file_list(self) -> List[str]:
         return self.listbox.get(0, 'end')
+
+
+@contextmanager
+def display_errors_and_warnings() -> Any:
+    try:
+        with warnings.catch_warnings(record=True) as warns:
+            yield
+            for w in warns:
+                tk.messagebox.showwarning("Warning", str(w.message))
+    except FileNotFoundError as ex:
+        tk.messagebox.showerror("Error", ex.strerror)
+    except Exception as ex:
+        tk.messagebox.showerror("Error", str(ex))
