@@ -5,6 +5,16 @@ import tkinter.ttk as ttk
 from typing import Literal, Any, Dict, Tuple, List, Optional
 
 
+def try_relpath(path: str) -> str:
+    """
+    Return relative path to the file, if possible
+    """
+    try:
+        return os.path.relpath(path)
+    except:
+        return os.path.abspath(path)
+
+
 class FileChooser():
     """
     Creates a frame with a label, entry and browse button for choosing files
@@ -113,3 +123,50 @@ class ColumnSelector():
             return None
         i = self.notebook.index("current")
         return (self.notebook.tab(i)["text"], self.lists[i].selection())
+
+
+class FileListChooser():
+    """
+    Contains a listbox with file names and "Add Files", "Add Directory" and "Remove Files" buttons
+    """
+
+    def __init__(self, parent: tk.Misc, *, label: str) -> None:
+        self.frame = ttk.Frame(parent)
+        self.frame.rowconfigure(4, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.label = ttk.Label(self.frame, text=label)
+        self.listbox = tk.Listbox(self.frame, height=10, selectmode='extended')
+        self.yscroll = ttk.Scrollbar(
+            self.frame, orient='vertical', command=self.listbox.yview)
+        self.listbox.configure(yscrollcommand=self.yscroll.set)
+        self.add_files_btn = ttk.Button(
+            self.frame, text="Add Files", command=self.add_files)
+        self.add_directory_btn = ttk.Button(
+            self.frame, text="Add Directory", command=self.add_directory)
+        self.remove_files_btn = ttk.Button(
+            self.frame, text="Remove Files", command=self.remove_files)
+
+        self.label.grid(row=0, column=0)
+        self.listbox.grid(row=1, column=0, rowspan=4)
+        self.yscroll.grid(row=1, column=1, rowspan=4, sticky="ns")
+        self.add_files_btn.grid(row=1, column=2, sticky="w")
+        self.add_directory_btn.grid(row=2, column=2, sticky="w")
+        self.remove_files_btn.grid(row=3, column=2, sticky="w")
+
+        self.grid = self.frame.grid
+
+    def add_files(self) -> None:
+        self.listbox.insert('end', *map(
+            try_relpath, tk.filedialog.askopenfilenames()))
+
+    def add_directory(self) -> None:
+        if not (dirname := tk.filedialog.askdirectory()):
+            return
+        self.listbox.insert('end', *map(try_relpath, os.listdir(dirname)))
+
+    def remove_files(self) -> None:
+        for i in reversed(self.listbox.curselection()):
+            self.listbox.delete(i)
+
+    def file_list(self) -> List[str]:
+        return self.listbox.get(0, 'end')
