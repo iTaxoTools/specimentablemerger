@@ -24,9 +24,10 @@ class TableFormat(FileFormat):
     def __init__(self, sep: str) -> None:
         self.sep = sep
 
-    def load_table(self, filepath_or_buffer: Union[str, TextIO]) -> pd.DataFrame:
-        return pd.read_csv(filepath_or_buffer, sep=self.sep).rename(
-            columns=str.casefold)
+    def load_table(self, filepath: str) -> pd.DataFrame:
+        with open(filepath, errors='replace') as infile:
+            return pd.read_csv(infile, sep=self.sep).rename(
+                    columns=str.casefold)
 
     def write_table(self, path_or_buf: Union[str, TextIO], table: pd.DataFrame) -> None:
         line_terminator = os.linesep if isinstance(path_or_buf, str) else "\n"
@@ -54,6 +55,7 @@ def merge_rows(rows: pd.DataFrame, column_name: str) -> pd.DataFrame:
         result = result.to_frame()
         if result.shape[1] == 1:
             result = result.T
+        result['remarks'] = ""
     return result
 
 
