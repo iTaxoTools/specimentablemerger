@@ -41,6 +41,7 @@ def gui_main() -> None:
         with display_errors_and_warnings():
             programstate.merger(input_chooser.file_list(),
                                 output_chooser.file_var.get())
+            tkmessagebox.showinfo("Done", "The merging has been completed")
 
     merge_btn = ttk.Button(root, text="Merge", command=merge)
 
