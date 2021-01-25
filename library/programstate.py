@@ -55,6 +55,7 @@ def merge_rows(rows: pd.DataFrame, column_name: str) -> pd.DataFrame:
         result = result.to_frame()
         if result.shape[1] == 1:
             result = result.T
+        result['remarks'] = ""
     return result
 
 
