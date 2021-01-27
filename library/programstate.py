@@ -99,6 +99,9 @@ class ProgramState():
     def set_unifying_field(self, field: str) -> None:
         self.unifying_field = field
 
+    def set_fuzzy_merge(self, fuzzy_merge: bool) -> None:
+        self.fuzzy_merge = fuzzy_merge
+
     def groupby_value(self, table: pd.DataFrame) -> Union[str, pd.Series]:
         if not self.fuzzy_merge:
             return self.unifying_field
