@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+import os
+import sys
 from library.gui_utils import *
 from library.programstate import *
+import tkinter.font as tkfont
 
 
 format_dict = {
@@ -13,9 +16,17 @@ format_dict = {
 
 def gui_main() -> None:
     root = tk.Tk()
-    root.rowconfigure(0, weight=1)
-    root.columnconfigure(0, weight=1)
-    root.columnconfigure(2, weight=1)
+    root.title("Specimentablemerger")
+    if os.name == "nt":
+        root.wm_iconbitmap(os.path.join(sys.path[0], 'data', 'specimentablemerger_icon.ico'))
+
+    style = ttk.Style()
+    style.configure("MergeButton.TButton", background="blue")
+
+    banner_frame = ttk.Frame(root)
+    logo_image = tk.PhotoImage(file=os.path.join(sys.path[0], 'data', 'iTaxoTools Digital linneaeus MICROLOGO.png'))
+    ttk.Label(banner_frame, image=logo_image).grid(row=0, column=0,sticky='nsw')
+    ttk.Label(banner_frame, text="Tool to merge the content of tables based on specimen identifiers or species names", font=tkfont.Font(size=14)).grid(row=0, column=1, sticky='ws')
 
     programstate = ProgramState()
 
@@ -37,23 +48,37 @@ def gui_main() -> None:
     unifying_field_cmb.var.trace_add(
         "write", lambda *_: programstate.set_unifying_field(unifying_field_cmb.var.get()))
 
+    fuzzy_merge_var = tk.BooleanVar()
+    fuzzy_merge_chk = ttk.Checkbutton(root, text="Allow for common misspellings of merge value", variable=fuzzy_merge_var)
+    fuzzy_merge_var.trace_add("write", lambda *_: programstate.set_fuzzy_merge(fuzzy_merge_var.get()))
+
     def merge() -> None:
         with display_errors_and_warnings():
             programstate.merger(input_chooser.file_list(),
                                 output_chooser.file_var.get())
             tkmessagebox.showinfo("Done", "The merging has been completed")
 
-    merge_btn = ttk.Button(root, text="Merge", command=merge)
+    merge_btn = ttk.Button(root, text="Merge", command=merge, style="MergeButton.TButton")
 
-    input_chooser.grid(row=0, column=0, sticky="nsew")
-    output_chooser.grid(row=0, column=2, sticky="nsew")
+    banner_frame.grid(row=0, column=0, columnspan=3, sticky='nsew')
+    ttk.Separator(root, orient='horizontal').grid(row=1, column=0, columnspan=3, sticky='nsew')
+    input_chooser.grid(row=2, column=0, sticky="nsew")
+    output_chooser.grid(row=2, column=2, sticky="new")
+    fuzzy_merge_chk.grid(row=3, column=0, sticky="nw")
 
-    input_format_cmb.grid(row=1, column=0)
-    output_format_cmb.grid(row=1, column=2)
+    #padding
+    ttk.Label(root).grid(row=4, column=0, pady=5)
 
-    unifying_field_cmb.grid(row=1, column=1)
+    input_format_cmb.grid(row=4, column=0)
+    output_format_cmb.grid(row=4, column=2)
 
-    merge_btn.grid(row=2, column=1)
+    unifying_field_cmb.grid(row=4, column=1)
+
+    merge_btn.grid(row=5, column=1)
+
+    root.rowconfigure(2, weight=1)
+    root.columnconfigure(0, weight=1)
+    root.columnconfigure(2, weight=1)
 
     root.mainloop()
 
