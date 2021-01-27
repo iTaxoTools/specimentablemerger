@@ -30,12 +30,13 @@ class TableFormat(FileFormat):
     def load_table(self, filepath: str) -> pd.DataFrame:
         with open(filepath, errors='replace') as infile:
             return pd.read_csv(infile, sep=self.sep).rename(
-                    columns=str.casefold)
+                columns=str.casefold)
 
     def write_table(self, path_or_buf: Union[str, TextIO], table: pd.DataFrame) -> None:
         line_terminator = os.linesep if isinstance(path_or_buf, str) else "\n"
         table.to_csv(path_or_buf, sep=self.sep, index=False,
                      line_terminator=line_terminator)
+
 
 def the_unique(column: pd.Series) -> Any:
     values = column.dropna()
@@ -47,6 +48,7 @@ def the_unique(column: pd.Series) -> Any:
         return result
     else:
         raise ValueError
+
 
 def the_unique_fuzzy(column: pd.Series) -> Any:
     values = column.dropna()
@@ -63,6 +65,10 @@ def the_unique_fuzzy(column: pd.Series) -> Any:
 
 
 def merge_rows(rows: pd.DataFrame, column_name: str, fuzzy_merge: bool) -> pd.DataFrame:
+    if fuzzy_merge and rows[column_name].nunique() > 1:
+        merge_remark = "Rows merged despite values of unifying fields not being fully identical - please verify"
+    else:
+        merge_remark = ""
     try:
         if fuzzy_merge:
             result = rows.agg(the_unique_fuzzy)
@@ -75,7 +81,7 @@ def merge_rows(rows: pd.DataFrame, column_name: str, fuzzy_merge: bool) -> pd.Da
         result = result.to_frame()
         if result.shape[1] == 1:
             result = result.T
-        result['remarks'] = ""
+        result['remarks'] = merge_remark
     return result
 
 
