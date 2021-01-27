@@ -48,6 +48,10 @@ def gui_main() -> None:
     unifying_field_cmb.var.trace_add(
         "write", lambda *_: programstate.set_unifying_field(unifying_field_cmb.var.get()))
 
+    fuzzy_merge_var = tk.BooleanVar()
+    fuzzy_merge_chk = ttk.Checkbutton(root, text="Allow for common misspellings of merge value", variable=fuzzy_merge_var)
+    fuzzy_merge_var.trace_add("write", lambda *_: programstate.set_fuzzy_merge(fuzzy_merge_var.get()))
+
     def merge() -> None:
         with display_errors_and_warnings():
             programstate.merger(input_chooser.file_list(),
@@ -59,14 +63,18 @@ def gui_main() -> None:
     banner_frame.grid(row=0, column=0, columnspan=3, sticky='nsew')
     ttk.Separator(root, orient='horizontal').grid(row=1, column=0, columnspan=3, sticky='nsew')
     input_chooser.grid(row=2, column=0, sticky="nsew")
-    output_chooser.grid(row=2, column=2, sticky="nsew")
+    output_chooser.grid(row=2, column=2, sticky="new")
+    fuzzy_merge_chk.grid(row=3, column=0, sticky="nw")
 
-    input_format_cmb.grid(row=3, column=0)
-    output_format_cmb.grid(row=3, column=2)
+    #padding
+    ttk.Label(root).grid(row=4, column=0, pady=5)
 
-    unifying_field_cmb.grid(row=3, column=1)
+    input_format_cmb.grid(row=4, column=0)
+    output_format_cmb.grid(row=4, column=2)
 
-    merge_btn.grid(row=4, column=1)
+    unifying_field_cmb.grid(row=4, column=1)
+
+    merge_btn.grid(row=5, column=1)
 
     root.rowconfigure(2, weight=1)
     root.columnconfigure(0, weight=1)
