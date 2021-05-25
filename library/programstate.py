@@ -29,7 +29,8 @@ class TableFormat(FileFormat):
 
     def load_table(self, filepath: str) -> pd.DataFrame:
         with open(filepath, errors='replace') as infile:
-            return pd.read_csv(infile, sep=self.sep).rename(
+            # force dtype to be str, because the_unique_fuzzy crashed on numbers
+            return pd.read_csv(infile, sep=self.sep, dtype=str).rename(
                 columns=str.casefold)
 
     def write_table(self, path_or_buf: Union[str, TextIO], table: pd.DataFrame) -> None:
